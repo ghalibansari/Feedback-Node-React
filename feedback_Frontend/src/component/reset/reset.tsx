@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import {Paper, TextField} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import axios from 'axios'
+import {toastError, toastSuccess} from '../utils/toast'
+import {withTokenPost} from "../../helper/AxiosGlobal";
 
 const customStyle = {
     mainDiv: {
@@ -43,9 +45,9 @@ class login extends Component {
         if (!(user?.first_login) && token) {
             //@ts-ignore
             this.props.history.push('/dashboard')
-        } else {
+        } else if (!token) {
             //@ts-ignore
-            // this.props.history.push('/login')
+            this.props.history.push('/login')
         }
     }
 
@@ -55,39 +57,37 @@ class login extends Component {
         }, () => console.log(this.state))
     };
 
-    resetapi = () => {
+    resetapi = async() => {
         const token: any = localStorage.getItem('token');
         const {password, newpassword} = this.state;
         const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        this.setState((prevState: any) => {
+            let errors = {...prevState.errors};
+            if (!passwordReg.test(password)) {
+                errors.passwordErr = 'password should have min 8 character, 1 number and 1 alphabet.'
+            } else {
+                errors.passwordErr = ''
+            }
+            if (!passwordReg.test(newpassword)) {
+                errors.newpasswordErr = 'password should have min 8 character, 1 number and 1 alphabet.'
+            } else {
+                errors.newpasswordErr = ''
+            }
+            return {errors}
+        })
         if (passwordReg.test(password) && passwordReg.test(newpassword)) {
-            axios.post('http://localhost:3000/user/reset', {
-                    password,
-                    newpassword,
-                }, {headers: {Authorization: `${token}`}})
-                .then((res) => {
-                    console.log(res.data)
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-            localStorage.clear();
-            //@ts-ignore
-            this.props.history.push('/login')
-        } else {
-            this.setState((prevState: any) => {
-                var errors = {...prevState.errors};
-                if (!passwordReg.test(password)) {
-                    errors.passwordErr = 'Invalid password'
-                } else {
-                    errors.passwordErr = ''
+            try{
+                let res = await withTokenPost('user/reset', {password, newpassword})
+                if(res.data.success){
+                    localStorage.clear()
+                    // toastSuccess("Password updated successfully please login.")
+                    toastSuccess(res.data.message)
+                    console.log("sucessssssss========")
+                    toastSuccess("res.data.message")
+                    //@ts-ignore
+                    this.props.history.push('/login')
                 }
-                if (!passwordReg.test(newpassword)) {
-                    errors.newpasswordErr = 'Invalid password'
-                } else {
-                    errors.newpasswordErr = ''
-                }
-                return {errors}
-            })
+            } catch (err) { toastError(`Your old ${err.response.data.message}.`) }
         }
     };
 

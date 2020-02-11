@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import {Paper, TextField} from '@material-ui/core';
-import {Link} from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-import axios from 'axios'
+import {toastError, toastSuccess, toastWarning} from '../utils/toast'
+import {withOutTokenPost} from '../../helper/AxiosGlobal'
 
 const customStyle = {
     mainDiv: {
@@ -51,52 +51,52 @@ class login extends Component {
             //@ts-ignore
             this.props.history.push('/dashboard')
             // this.props.history.push('/reset')
-        } else {
-            //@ts-ignore
-            this.props.history.push('/login')
         }
+        // else {
+            //@ts-ignore
+            // this.props.history.push('/login')
+        // }
     }
 
-    loginapi = () => {
-        const {email, password} = this.state;
+    loginapi = async () => {
+        const {email, password} = this.state
         // eslint-disable-next-line no-useless-escape
-        const mailReg: any = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const mailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
         const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        this.setState((prevState: any) => {
+            let errors = {...prevState.errors};
+            if (!mailReg.test(email)) {
+                errors.emailErr = 'Invalid email'
+            } else {
+                errors.emailErr = ''
+            }
+            if (!passwordReg.test(password)) {
+                errors.passwordErr = 'Inavlid password'
+            } else {
+                errors.passwordErr = ''
+            }
+            return {errors}
+        })
         if (mailReg.test(email) && passwordReg.test(password)) {
-            axios.post('http://localhost:3000/user/login', {
-                email,
-                password,
-            }).then((res) => {
+            try{
+                let res = await withOutTokenPost('user/login', {email, password})
                 if (res.data.success) {
                     localStorage.setItem('token', res.data.data.jwt_token);
                     localStorage.setItem('user', JSON.stringify(res.data.data.user));
                     if (res.data.data.user.first_login) {
+                        // toastSuccess("Please Change your password.")
+                        toastWarning("Please Change your password.")
                         //@ts-ignore
                         this.props.history.push('/reset')
                     } else {
+                        toastSuccess("Login Successfully.")
                         //@ts-ignore
                         this.props.history.push('/dashboard')
                     }
                 }
-            })
-                .catch(function (error) {
-                    console.log(error);
-                });
-        } else {
-            this.setState((prevState: any) => {
-                var errors = {...prevState.errors};
-                if (!mailReg.test(email)) {
-                    errors.emailErr = 'Invalid email'
-                } else {
-                    errors.emailErr = ''
-                }
-                if (!passwordReg.test(password)) {
-                    errors.passwordErr = 'Invalid password'
-                } else {
-                    errors.passwordErr = ''
-                }
-                return {errors}
-            })
+            } catch (err) {
+                toastError(`${err.response.data.message}.`)
+            }
         }
     };
 
@@ -131,8 +131,6 @@ class login extends Component {
                     <div style={{display: 'flex', justifyContent: 'center'}}>
                         <div style={{display: 'flex', width: '70%', justifyContent: 'space-around'}}>
                             <Button onClick={this.loginapi} variant="contained" color="primary">Login</Button>
-                            <Link to="/dashboard"><Button variant="contained">Dash</Button></Link>
-                            <Link to="/addfeedback"><Button variant="contained">FeedBack</Button></Link>
                         </div>
                     </div>
                 </Paper>

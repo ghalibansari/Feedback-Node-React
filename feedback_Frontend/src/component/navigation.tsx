@@ -42,13 +42,10 @@ class navigation extends Component {
 
     lougout = () => {
         localStorage.clear();
-        // this.setState(this.getInitialState())
-        // this.setState({
-        //   authenticated: '',
-        //   user: {},
-        // })
-        //@ts-ignore
-        console.log(this.props.history.push, "=========>>>>>>>>>>>>>>>>>>>");
+        this.setState({
+          authenticated: '',
+          user: {},
+        })
         //@ts-ignore
         this.props.history.push('/login')
     };
@@ -79,8 +76,7 @@ class navigation extends Component {
                                         color="inherit">DashBoard</Button></Link>
                                     <Link to="/addfeedback" style={{color: 'white'}}><Button color="inherit">Add
                                         FeedBack</Button></Link>
-                                    <Link to="" style={{color: 'white'}}><Button color="inherit"
-                                                                                 onClick={this.lougout}>Logout</Button></Link>
+                                    <Link to="" style={{color: 'white'}}><Button color="inherit" onClick={this.lougout}>Logout</Button></Link>
                                 </div>
                             </div>
                             :
@@ -91,12 +87,8 @@ class navigation extends Component {
                                     </Typography>
                                 </div>
                                 <div style={{alignSelf: 'center',}}>
-                                    <Link style={{color: 'white'}} to="/login"><Button
-                                        color="inherit">Login</Button></Link>
-                                    <Link to="/register" style={{color: 'white'}}><Button
-                                        color="inherit">Registration</Button></Link>
-                                    <Link to="/reset" style={{color: 'white'}}><Button
-                                        color="inherit">Reset</Button></Link>
+                                    <Link style={{color: 'white'}} to="/login"><Button color="inherit">Login</Button></Link>
+                                    <Link to="/register" style={{color: 'white'}}><Button color="inherit">Registration</Button></Link>
                                 </div>
                             </div>
                     }

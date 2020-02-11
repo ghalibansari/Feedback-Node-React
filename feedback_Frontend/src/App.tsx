@@ -11,31 +11,31 @@ import Dashboard from './component/dahboard/dashboard'
 import Addfeedback from './component/addfeedback/addfeedback'
 
 class App extends Component {
-    // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-    constructor(props: any) {
-        super(props)
-    };
+	// eslint-disable-next-line @typescript-eslint/no-useless-constructor
+	constructor(props: any) {
+		super(props)
+	};
 
-    render() {
-        return (
-            <Router>
-                <div className="App" style={{backgroundColor: '#f5f5f5', minHeight: 'calc(100vh - 48px)'}}>
-                    <Navigation {...this.props}/>
-                    <Switch>
-                        <Container fixed>
-                            <Redirect exact from="/" to="/login"/>
-                            <Route path="/login" exact component={Login}/>
-                            <Route path="/register" exact component={Registration}/>
-                            <Route path="/reset" exact component={Reset}/>
-                            <Route path="/dashboard" exact component={Dashboard}/>
-                            <Route path="/addfeedback" exact component={Addfeedback}/>
-                        </Container>
-                    </Switch>
-                </div>
-                <Footer/>
-            </Router>
-        );
-    }
+	render() {
+		return (
+			<Router>
+				<div className="App" style={{backgroundColor: '#f5f5f5', minHeight: 'calc(100vh - 48px)'}}>
+					<Navigation {...this.props}/>
+					<Container fixed>
+						<Switch>
+							<Redirect exact from="/" to="/login"/>
+							<Route exact path="/login" component={Login}/>
+							<Route exact path="/register"  component={Registration}/>
+							<Route exact path="/reset" component={Reset}/>
+							<Route exact path="/dashboard" component={Dashboard}/>
+							<Route exact path="/addfeedback" component={Addfeedback}/>
+						</Switch>
+					</Container>
+				</div>
+				<Footer/>
+			</Router>
+		);
+	}
 }
 
 export default App;
