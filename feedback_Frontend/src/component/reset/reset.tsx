@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import {Paper, TextField} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import axios from 'axios'
 import {toastError, toastSuccess} from '../utils/toast'
 import {withTokenPost} from "../../helper/AxiosGlobal";
 
@@ -58,7 +57,7 @@ class login extends Component {
     };
 
     resetapi = async() => {
-        const token: any = localStorage.getItem('token');
+        // const token: any = localStorage.getItem('token');
         const {password, newpassword} = this.state;
         const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
         this.setState((prevState: any) => {
@@ -80,10 +79,7 @@ class login extends Component {
                 let res = await withTokenPost('user/reset', {password, newpassword})
                 if(res.data.success){
                     localStorage.clear()
-                    // toastSuccess("Password updated successfully please login.")
                     toastSuccess(res.data.message)
-                    console.log("sucessssssss========")
-                    toastSuccess("res.data.message")
                     //@ts-ignore
                     this.props.history.push('/login')
                 }
@@ -95,7 +91,7 @@ class login extends Component {
         return (
             <div style={customStyle.mainDiv}>
                 <Paper style={customStyle.div} variant='elevation'>
-                    <h1>Reset...</h1>
+                    <h1>Reset.</h1>
                     <TextField
                         required
                         id=""

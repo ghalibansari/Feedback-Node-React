@@ -81,7 +81,7 @@ class dashboard extends Component {
                 <Grid item key={value.receiver} sm={4}>
                     <Card>
                         {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                        <img src={value.receiverImage} alt={"Profile picture"}/>
+                        <img src={value.receiverImage} alt={"Profile picture"} style={{position:'relative', width:'100%', height:'170px'}} />
                         <CardContent>
                             <Typography variant="h5" component="h2">
                                 {value.receiverName}

@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import ButtonComponent from './ButtonComponent'
 
 const customStyles = {
     header: {
@@ -24,6 +25,7 @@ class navigation extends Component {
     state = {
         authenticated: '',
         user: {},
+        currentRoute: true
     };
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -40,7 +42,21 @@ class navigation extends Component {
         })
     };
 
-    lougout = () => {
+    hideRoute = async () => {
+        //@ts-ignore
+        // console.log(this.props.history.location.pathname)
+        // setTimeout(this.setState({
+        //     //@ts-ignore
+        //     currentRoute: this.props.location.pathname,
+        // }), 1000)
+        await this.setState({
+            //@ts-ignore
+            currentRoute: !this.state.currentRoute,
+        })
+        console.log(this.state.currentRoute)
+    }
+
+    logout = () => {
         localStorage.clear();
         this.setState({
           authenticated: '',
@@ -52,6 +68,25 @@ class navigation extends Component {
 
     render() {
         const {user} = this.state;
+        let text = ''
+        let location = ''
+        //@ts-ignore
+        if(this.props.location.pathname === '/login'){
+            text = 'register'
+            location = '/register'
+            //@ts-ignore
+        } else if(this.props.location.pathname === '/register') {
+            text = 'login'
+            location = '/login'
+            //@ts-ignore
+        } else if(this.props.location.pathname === '/dashboard') {
+            text = 'addfeedback'
+            location = '/addfeedback'
+            //@ts-ignore
+        } else if(this.props.location.pathname === '/addfeedback') {
+            text = 'dashboard'
+            location = '/dashboard'
+        }
         return (
             <AppBar position="static">
                 <Toolbar>
@@ -72,11 +107,14 @@ class navigation extends Component {
                                     </Typography>
                                 </div>
                                 <div style={{alignSelf: 'center',}}>
-                                    <Link to="/dashboard" style={{color: 'white'}}><Button
+                                    {/* <Link to="/dashboard" style={{color: 'white'}}><Button
                                         color="inherit">DashBoard</Button></Link>
                                     <Link to="/addfeedback" style={{color: 'white'}}><Button color="inherit">Add
-                                        FeedBack</Button></Link>
-                                    <Link to="" style={{color: 'white'}}><Button color="inherit" onClick={this.lougout}>Logout</Button></Link>
+                                        FeedBack</Button></Link> */}
+                                    {/*
+                                    // @ts-ignore */}
+                                    <ButtonComponent text={text} location={location} history={this.props.history}/>
+                                    <Link to="" style={{color: 'white'}}><Button color="inherit" onClick={this.logout}>Logout</Button></Link>
                                 </div>
                             </div>
                             :
@@ -87,8 +125,13 @@ class navigation extends Component {
                                     </Typography>
                                 </div>
                                 <div style={{alignSelf: 'center',}}>
-                                    <Link style={{color: 'white'}} to="/login"><Button color="inherit">Login</Button></Link>
-                                    <Link to="/register" style={{color: 'white'}}><Button color="inherit">Registration</Button></Link>
+                                    {/*<Link to="/login" hidden={!this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Login</Button></Link>*/}
+                                    {/*<Link to="/register" hidden={this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Registration</Button></Link>*/}
+                                    {/* <Link to="/login" hidden={!this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Login</Button></Link>
+                                    <Link to="/register" hidden={this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Registration</Button></Link> */}
+                                    {/*
+                                    // @ts-ignore */}
+                                    <ButtonComponent text={text} location={location} history={this.props.history}/>
                                 </div>
                             </div>
                     }

@@ -29,6 +29,7 @@ class App extends Component {
 							<Route exact path="/reset" component={Reset}/>
 							<Route exact path="/dashboard" component={Dashboard}/>
 							<Route exact path="/addfeedback" component={Addfeedback}/>
+							<Redirect exact from="/*" to="/login"/>
 						</Switch>
 					</Container>
 				</div>

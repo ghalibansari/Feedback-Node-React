@@ -3,6 +3,7 @@ import {Paper, TextField} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import {toastError, toastSuccess, toastWarning} from '../utils/toast'
 import {withOutTokenPost} from '../../helper/AxiosGlobal'
+import crypto from 'crypto'
 
 const customStyle = {
     mainDiv: {
@@ -50,7 +51,6 @@ class login extends Component {
         if (token) {
             //@ts-ignore
             this.props.history.push('/dashboard')
-            // this.props.history.push('/reset')
         }
         // else {
             //@ts-ignore
@@ -105,7 +105,7 @@ class login extends Component {
             <div style={customStyle.mainDiv}>
                 {this.state.redirectto}
                 <Paper style={customStyle.div} variant='elevation'>
-                    <h1>Login...</h1>
+                    <h1>Login.</h1>
                     <TextField
                         required
                         id=""
