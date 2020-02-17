@@ -6,8 +6,8 @@ import {cronSchedule} from './app/controller/cron.controller'
 
 const app = express();  //express instance.
 
-//access methods here.
-app.use((req, res, next) => {
+
+app.use((req, res, next) => {   //access methods(CORS) here.
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, credentials, withCredentials");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");

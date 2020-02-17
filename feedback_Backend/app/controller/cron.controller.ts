@@ -6,13 +6,16 @@ import {guard} from "../helper/Auth";
 
 const router: Router = Router();
 const feedbackNumber: number = 3;
-// let cronSchedule = new Cron.CronJob('1 * * * * *', function() { // testing line. please remove this line before production
+
+//Cron Job init.
 let cronSchedule = new Cron.CronJob('0 0 * * FRI', function () { // testing line. please remove this line before production
     cronScheduleCreater();
     console.log("from cron")
 }, '0', true);
 
-//function for craeting random feedback using cron every friday.
+/**
+ * function for craeting random feedback using cron every friday.
+ */
 let cronScheduleCreater = async () => {
     try {
         await CronModel.deleteMany({});
@@ -48,7 +51,11 @@ let cronScheduleCreater = async () => {
     }
 };
 
-//inserting feedback here.
+/**
+ * inserting feedback here.
+ * @param req 
+ * @param res 
+ */
 let addFeedback = async (req: Request, res: Response) => {
     try {
         CronModel.find({
@@ -60,16 +67,17 @@ let addFeedback = async (req: Request, res: Response) => {
                     data.forEach(elm => elm['receiverImage'] = `http://localhost:3000/static/${elm['receiverImage']}`);
                     res.status(200).json({status: 200, success: true, message: "feedback list.", data})
                 } else {
-                    res.status(200).json({status: 200, success: true, message: "No feedback found"})
+                    res.status(200).json({status: 200, success: false, message: "No feedback found"})
                 }
             }).catch((err) => {
-            res.status(403).json({status: 403, success: false, message: err.details[0].message})
+            res.status(400).json({status: 400, success: false, message: err.details[0].message})
         })
     } catch (err) {
-        res.status(403).json({status: 403, success: false, message: err.details[0].message})
+        res.status(400).json({status: 400, success: false, message: err.details[0].message})
     }
 };
 
+//sub route.
 router.get('/', cronScheduleCreater);
 router.get('/addfeedback', guard, addFeedback);
 

@@ -17,7 +17,11 @@ let ReadFeedBack = async (req: Request, res: Response) => {
     }
 };
 
-//new feedback inserts here.
+/**
+ * new feedback inserts here.
+ * @param req   {user_id,   feedback}
+ * @param res   {success}
+ */
 let CreateFeedBack = async (req: Request, res: Response) => {
     const newData: any = req.body;
     const schema = Joi.object().keys({
@@ -29,24 +33,32 @@ let CreateFeedBack = async (req: Request, res: Response) => {
     try {
         Joi.validate(newData, schema, async (err: any, value: String) => {
             if (err) {
-                res.status(403).json({status: 403, success: false, message: err.details[0].message,})
+                res.status(400).json({status: 400, success: false, message: err.details[0].message,})
             } else {
-                CronModel.updateOne({sender: req.body.loggedInUser.id, receiver: newData.user_id, status: false}, {status: true})
-                .then(data => {
-                    if (data.nModified) {
-                        new FeedBackModel(newData).save()
-                            .then(() => {
-                                res.json({status: 200, success: true, message: "feedback successfully added",});
-                            })
-                    } else {
-                        res.status(400).json({status: 400, success: false, message: "failed to insert",});
-                    }
-                })
+                CronModel.updateOne({
+                    sender: req.body.loggedInUser.id,
+                    receiver: newData.user_id,
+                    status: false
+                }, {status: true})
+                    .then(data => {
+                        if (data.nModified) {
+                            new FeedBackModel(newData).save()
+                                .then(() => {
+                                    res.status(200).json({
+                                        status: 200,
+                                        success: true,
+                                        message: "Feedback successfully added",
+                                    });
+                                })
+                        } else {
+                            res.status(400).json({status: 400, success: false, message: "failed to insert",});
+                        }
+                    })
             }
         })
     } catch (err) {
         console.log("err", err.message);
-        res.json({status: 401, success: false, message: err.message,});
+        res.status(400).json({status: 400, success: false, message: err.message,});
     }
 };
 
@@ -72,17 +84,21 @@ let DeleteFeedBack = async (req: Request, res: Response) => {
     }
 };
 
-//dashbaord api.
+/**
+ * dashbaord api.
+ * @param req 
+ * @param res {all feedback of that particular user}
+ */
 let DashBoard = async (req: Request, res: Response) => {
     try {
         const data: any = await FeedBackModel.find({user_id: req.body.loggedInUser.id,}).select('date feedback');
         res.status(200).json({status: 200, success: true, message: "dashboard list.", data,})
     } catch (err) {
-        res.status(403).json({status: 403, success: false, message: err.message,})
+        res.status(400).json({status: 400, success: false, message: err.message,})
     }
 };
 
-
+//all sub route's.
 router.get('/', guard, ReadFeedBack);
 router.post('/', guard, CreateFeedBack);
 router.put('/', UpdateFeedBack);

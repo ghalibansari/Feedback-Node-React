@@ -7,16 +7,17 @@ import fileExt from 'file-extension';
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt'
 import {guard} from "../helper/Auth";
+import AES from 'crypto-js/aes';
 
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{2,}$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{2,}$/;    //password regex
 
-const storage = multer.diskStorage({
+const storage = multer.diskStorage({    //multer
     destination: (req, file, cb) => cb(null, 'app/uploads/'),
-    filename: async (req, file, cb) => cb(null, file.fieldname + '-' + Date.now() + '.' + fileExt(file.originalname))
+    filename: async (req, file, cb) => cb(null, file.fieldname + '-' + Date.now() + '.' + fileExt(file.originalname))   //changing filename here.
 });
 
 const upload = multer({storage: storage});
-const router: Router = Router();
+const router: Router = Router();    //init router instance.
 
 //basic crud operation not in use.
 let ReadUser = async (req: Request, res: Response) => {
@@ -29,12 +30,17 @@ let ReadUser = async (req: Request, res: Response) => {
     }
 };
 
-//Resgistartion api.
+/**
+ * Resgistartion api.
+ * @param req {firstname,   lastname,   email,  dob,    gender,     profile_img}
+ * @param res {success or fails message}
+ * @returns This returns hdfkjsdhf sd fksdfks dflsd flsdfls
+ */
 let Registration = (req: Request, res: Response) => {
     const schema = Joi.object().keys({
         firstName: Joi.string().required().regex(/^[A-Za-z]+$/),
         lastName: Joi.string().required().regex(/^[A-Za-z]+$/),
-        email: Joi.string().required().email({minDomainAtoms: 2}).regex(/^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i),
+        email: Joi.string().required().email({minDomainAtoms: 2}).regex(/^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/),
         dob: Joi.string().required(),
         gender: Joi.string().required(),
         profile_img: Joi.any().required(),
@@ -45,30 +51,22 @@ let Registration = (req: Request, res: Response) => {
 
     try {
         Joi.validate(newData, schema, async (err: any, value: String) => {
-            if (err) {
-                res.status(403).json({
-                    status: 403,
-                    success: false,
-                    message: err.details[0].message,
-                })
-            } else {
-                let passwordarr = ["Aardvark", "Ant", "Anteater", "Wombat", "Ape", "Armadillo", "Donkey",];
+            if (err) { res.status(400).json({status: 400, success: false, message: err.details[0].message}) }
+            else {
+                let passwordarr = ["Aardvark", "AntDSa", "Anteater", "Wombat", "Apeght", "Armadillo", "Donkey",];   //random text used in password generation.
                 let passwordarrRandom = passwordarr[Math.floor(Math.random() * passwordarr.length)];
                 let rando = Math.floor(Math.random() * 1000);
                 const saltRounds = 10;
                 let salt = bcrypt.genSaltSync(saltRounds);
                 const myPlaintextPassword = `${passwordarrRandom}${rando}`;
-                console.log(myPlaintextPassword, "myPlaintextPassword");
                 let encrypt = bcrypt.hashSync(myPlaintextPassword, salt);
                 newData.password = `${encrypt}`;
-                //user saved in database
-                let datax: any = await new UserModel(newData).save().catch(() => {
-                    return res.status(400).json({status: 400, success: false, message: "Sonething went wrong...",})
+                let datax: any = await new UserModel(newData).save().catch((err) => {   //user saved in database
+                    return res.status(400).json({status: 400, success: false, message: err.errmsg,})
                 });
-                //mailing the user.
                 let data: any = {...datax._doc};
                 delete data.password;
-                let transporter = nodemailer.createTransport({
+                let transporter = nodemailer.createTransport({  //mailing the user new password.
                     host: "mail.neosofttech.com",
                     port: 587,
                     secure: false, // true for 465, false for other ports
@@ -88,11 +86,16 @@ let Registration = (req: Request, res: Response) => {
                 });
                 console.log("Message sent: %s", info.messageId);
                 console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-                res.status(200).json({status: 200, success: true, message: "User Registered successfully.", data,})
+                res.status(200).json({
+                    status: 200,
+                    success: true,
+                    message: "Registration Sucessfull. Please Check email for password.",
+                    data
+                })
             }
         })
     } catch (err) {
-        res.status(403).json({status: 406, success: false, message: err.message,})
+        res.status(400).json({status: 400, success: false, message: err.message,})
     }
 };
 
@@ -118,10 +121,14 @@ let DeleteUser = async (req: Request, res: Response) => {
     }
 };
 
-//login api.
+/**
+ * login api.
+ * @param req   {email,     password}
+ * @param res   {encrypted_jwt_token,   user_object}
+ */
 let login = async (req: Request, res: Response) => {
     const schema = Joi.object().keys({
-        email: Joi.string().email({minDomainAtoms: 2}).required(),
+        email: Joi.string().email({minDomainAtoms: 2}).regex(/^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/).required(),
         password: Joi.string().required().regex(passwordRegex),
     });
 
@@ -129,13 +136,14 @@ let login = async (req: Request, res: Response) => {
     try {
         Joi.validate(newData, schema, async (err: any, value: String) => {
             if (err) {
-                res.status(403).json({status: 403, success: false, message: err.details[0].message,})
+                res.status(400).json({status: 400, success: false, message: err.details[0].message,})
             } else {
                 UserModel.findOne({email: newData.email})
                     .then((data: any) => {
                         let compared = bcrypt.compareSync(newData.password, data.password);
+                        console.log(compared, "comapred", newData.password, " ", data.password, " ", newData.email);
                         if (data?.email == newData.email && compared) {
-                            let user: any = {};
+                            let user: any = {};     //making new object of user before sending to front_end.
                             user.firstName = data.firstName;
                             user.lastName = data.lastName;
                             user.email = data.email;
@@ -143,27 +151,28 @@ let login = async (req: Request, res: Response) => {
                             user.profile_img = `http://localhost:3000/static/${data.profile_img}`;
                             user.gender = data.gender;
                             user.first_login = data.first_login;
-                            let jwt_token: any = jwt.sign({
+                            let jwt_token_eccyrpt: any = jwt.sign({
                                 email: data.email,
                                 id: data._id
                             }, 'secrets', {expiresIn: daysInSeconds(600 / (24 * 60))});
+                            let jwt_token = AES.encrypt(jwt_token_eccyrpt, 'secret_key_jwt_token').toString();
                             res.status(200).json({
                                 status: 200,
                                 success: true,
                                 message: "Login Successfully",
-                                data: {jwt_token, user},
+                                data: {jwt_token, user, token: jwt_token_eccyrpt},
                             })
                         } else {
-                            res.status(403).json({
-                                status: 403,
+                            res.status(401).json({
+                                status: 401,
                                 success: false,
-                                message: "Email or Password is Invalid.",
+                                message: "Email or Password is Invalid."
                             })
                         }
                     })
                     .catch(() => {
-                        res.status(403).json({status: 403, success: false, message: "Email or Password is Invalid.",})
-                })
+                        res.status(401).json({status: 401, success: false, message: "Email or Password is Invalid.",})
+                    })
             }
         });
     } catch (err) {
@@ -171,7 +180,11 @@ let login = async (req: Request, res: Response) => {
     }
 };
 
-//password reset api.
+/**
+ * password reset api.
+ * @param req   {oldpassword,   newpassword}
+ * @param res   {success or fails message}
+ */
 let reset = async (req: Request, res: Response) => {
     const schema = Joi.object().keys({
         password: Joi.string().required().regex(passwordRegex),
@@ -183,20 +196,20 @@ let reset = async (req: Request, res: Response) => {
     try {
         Joi.validate(newData, schema, async (err: any, value: String) => {
             if (err) {
-                res.status(403).json({status: 403, success: false, message: err.details[0].message})
+                res.status(400).json({status: 400, success: false, message: err.details[0].message})
             } else {
                 const data: any = await UserModel.findOne({email: newData.loggedInUser.email}).select('password');
-                let compared = bcrypt.compareSync(newData.password, data.password);
+                let compared = bcrypt.compareSync(newData.password, data.password);     //comparing oldpassword and newpassword.
                 if (compared) {
                     const saltRounds = 10;
                     let salt = bcrypt.genSaltSync(saltRounds);
                     const myPlaintextPassword = newData.newpassword;
                     let newPassword = bcrypt.hashSync(myPlaintextPassword, salt);
-                    //password updating here.
-                    UserModel.updateOne({email: newData.loggedInUser.email}, {$set: {password: newPassword, first_login: false}})
+                    UserModel.updateOne({email: newData.loggedInUser.email}, {      //password updating here.
+                        $set: { password: newPassword, first_login: false }
+                    })
                         .then(async () => {
-                            //sending updated password to user.
-                            let transporter = nodemailer.createTransport({
+                            let transporter = nodemailer.createTransport({      //sending info about password updated..
                                 host: "mail.neosofttech.com",
                                 port: 587,
                                 secure: false, // true for 465, false for other ports
@@ -219,11 +232,11 @@ let reset = async (req: Request, res: Response) => {
                             return res.status(200).json({
                                 status: 200,
                                 success: true,
-                                message: "Password update successfully.",
+                                message: "Password update successfully."
                             })
                         })
                 } else {
-                    res.status(403).json({status: 403, success: false, message: "Password is Invalid."})
+                    res.status(400).json({status: 400, success: false, message: "Password is Invalid."})
                 }
             }
         })
@@ -240,7 +253,7 @@ function daysInSeconds(days: number): number {
     return oneDay * days;
 }
 
-
+//all sub-route's.
 router.get('/', ReadUser);
 router.post('/', upload.single('profile_img'), Registration);
 router.put('/', UpdateUser);

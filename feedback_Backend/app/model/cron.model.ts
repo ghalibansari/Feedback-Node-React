@@ -1,5 +1,6 @@
 import mongoose, {Schema} from 'mongoose';
 
+//cron schema.
 const CronSchema: Schema = new Schema({
     sender: {required: true, type: Schema.Types.ObjectId, ref: 'UserModel',},
     receiver: {required: true, type: Schema.Types.ObjectId, ref: 'UserModel'},

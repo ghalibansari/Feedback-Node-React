@@ -10,9 +10,7 @@ const router = Router();
 router.use('/user', userRouter);    //user routers here.
 router.use('/feedback', feedbackRouter);    //feedback roouters here.
 router.use('/cron', cronRouter);    //cron routers here.
-router.use('*', function (req, res) {
-    res.status(404).json({status: 404, success: false, message: "Page not found."})
-});
+router.use('*', function (req, res) { res.status(404).json({status: 404, success: false, message: "Page not found."}) });   //404 pages here.
 
 // Export the base-router
 export default router;
