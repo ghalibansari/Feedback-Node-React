@@ -3,9 +3,9 @@ import * as Cron from 'cron';
 import CronModel from '../model/cron.model'
 import UserModel from '../model/user.model';
 import {guard} from "../helper/Auth";
+import {Constants} from '../constant'
 
 const router: Router = Router();
-const feedbackNumber: number = 3;
 
 //Cron Job init.
 let cronSchedule = new Cron.CronJob('0 0 * * FRI', function () { // testing line. please remove this line before production
@@ -26,7 +26,7 @@ let cronScheduleCreater = async () => {
             let cronFisrtName: any = [];
             let cronLastName: any = [];
             let cronImage: any = [];
-            for (let i = 0; cronJson.length < feedbackNumber; i++) {
+            for (let i = 0; cronJson.length < Constants.numberOfFeedback; i++) {
                 let rando: any = data[Math.floor(Math.random() * data.length)];
                 let finder = cronJson.find(e => e == rando._id);
                 if (elm._id !== rando._id && finder == undefined) {
@@ -36,7 +36,7 @@ let cronScheduleCreater = async () => {
                     cronImage.push(rando.profile_img)
                 }
             }
-            for (let i = 0; i < feedbackNumber; i++) {
+            for (let i = 0; i < Constants.numberOfFeedback; i++) {
                 cronData.push({
                     sender: elm._id,
                     receiver: cronJson[i],
@@ -54,7 +54,8 @@ let cronScheduleCreater = async () => {
 /**
  * inserting feedback here.
  * @param req 
- * @param res 
+ * @param res {feedback list}
+ * @returns feedback list.
  */
 let addFeedback = async (req: Request, res: Response) => {
     try {

@@ -3,7 +3,6 @@ import UserModel from '../model/user.model';
 import Joi from 'joi';
 import multer from 'multer';
 import * as jwt from "jsonwebtoken";
-import fileExt from 'file-extension';
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt'
 import {guard} from "../helper/Auth";
@@ -13,7 +12,7 @@ const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{2,}$/;    //password r
 
 const storage = multer.diskStorage({    //multer
     destination: (req, file, cb) => cb(null, 'app/uploads/'),
-    filename: async (req, file, cb) => cb(null, file.fieldname + '-' + Date.now() + '.' + fileExt(file.originalname))   //changing filename here.
+    filename: async (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)   //changing filename here.
 });
 
 const upload = multer({storage: storage});
@@ -34,7 +33,6 @@ let ReadUser = async (req: Request, res: Response) => {
  * Resgistartion api.
  * @param req {firstname,   lastname,   email,  dob,    gender,     profile_img}
  * @param res {success or fails message}
- * @returns This returns hdfkjsdhf sd fksdfks dflsd flsdfls
  */
 let Registration = (req: Request, res: Response) => {
     const schema = Joi.object().keys({
@@ -125,6 +123,7 @@ let DeleteUser = async (req: Request, res: Response) => {
  * login api.
  * @param req   {email,     password}
  * @param res   {encrypted_jwt_token,   user_object}
+ * @returns {encrypted_jwt_token,   user_object}
  */
 let login = async (req: Request, res: Response) => {
     const schema = Joi.object().keys({

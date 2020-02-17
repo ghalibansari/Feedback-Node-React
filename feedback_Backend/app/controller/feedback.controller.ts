@@ -3,6 +3,7 @@ import FeedBackModel from '../model/feedback.model';
 import CronModel from '../model/cron.model'
 import Joi from 'joi';
 import {guard} from '../helper/Auth';
+import {Constants} from '../constant'
 
 const router: Router = Router();
 
@@ -88,10 +89,11 @@ let DeleteFeedBack = async (req: Request, res: Response) => {
  * dashbaord api.
  * @param req 
  * @param res {all feedback of that particular user}
+ * @returns all list of feedbacks.
  */
 let DashBoard = async (req: Request, res: Response) => {
     try {
-        const data: any = await FeedBackModel.find({user_id: req.body.loggedInUser.id,}).select('date feedback');
+        const data: any = await FeedBackModel.find({user_id: req.body.loggedInUser.id,}).select('date feedback');   //getting date and feedback columns.
         res.status(200).json({status: 200, success: true, message: "dashboard list.", data,})
     } catch (err) {
         res.status(400).json({status: 400, success: false, message: err.message,})
