@@ -1,5 +1,6 @@
 import {toast} from 'react-toastify'
 
+//Css props for toast.
 const toastConfig: any = {
     position: "top-right",
     autoClose: 5000,
@@ -7,24 +8,29 @@ const toastConfig: any = {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    }
-    
-    export const toastSuccess = (message: string) => {
+};
+
+//toast Successfull @param {message}
+export const toastSuccess = (message: string) => {
     toast.success(message, toastConfig)
-    }
-    
-    export const toastInfo = (message: string) => {
+};
+
+//toast Information @param {message}
+export const toastInfo = (message: string) => {
     toast.info(message, toastConfig)
-    }
-    
-    export const toastWarning = (message: string) => {
+};
+
+//toast Warning @param {message}
+export const toastWarning = (message: string) => {
     toast.warn(message, toastConfig)
-    }
-    
-    export const toastError = (message: string) => {
+};
+
+//toast Error @param {message}
+export const toastError = (message: string) => {
     toast.error(message, toastConfig)
-    }
-    
-    export const toastDefault = (message: string) => {
+};
+
+//toast Default @param {message}
+export const toastDefault = (message: string) => {
     toast(message, toastConfig)
-    }
+};

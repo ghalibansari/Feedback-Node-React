@@ -8,6 +8,8 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import ButtonComponent from './ButtonComponent'
 
+
+//Style's.
 const customStyles = {
     header: {
         display: 'flex',
@@ -21,11 +23,12 @@ const customStyles = {
     subdiv: {display: 'flex'}
 };
 
+
+//Navigation.
 class navigation extends Component {
     state = {
-        authenticated: '',
+        authenticated: false,
         user: {},
-        currentRoute: true
     };
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -33,109 +36,97 @@ class navigation extends Component {
         super(props)
     };
 
-    componentDidMount() {
+    static getDerivedStateFromProps(props: any, state: any) {
+        let token = localStorage.getItem('token');
         let userlocal: any = localStorage.getItem('user');
         let user = JSON.parse(userlocal);
-        this.setState({
-            authenticated: localStorage.getItem('token'),
-            user,
-        })
-    };
-
-    hideRoute = async () => {
-        //@ts-ignore
-        // console.log(this.props.history.location.pathname)
-        // setTimeout(this.setState({
-        //     //@ts-ignore
-        //     currentRoute: this.props.location.pathname,
-        // }), 1000)
-        await this.setState({
-            //@ts-ignore
-            currentRoute: !this.state.currentRoute,
-        })
-        console.log(this.state.currentRoute)
+        if (token !== null && token !== undefined) { return { authenticated: true, user } }
+        else {
+            if (props.isloggined !== state.authenticated) { return { authenticated: props.isloggined } }
+            return null;
+        }
     }
 
+    componentDidMount() {
+        let token: any = localStorage.getItem('token');
+        let userlocal: any = localStorage.getItem('user');
+        let user = JSON.parse(userlocal);
+        if (token !== null && token !== undefined) { this.setState({ authenticated: true, user }) }
+        //@ts-ignore
+        else { this.setState({ authenticated: this.props.isloggined }) }
+    };
+
+    //Logout function. clears all state and localStrorage.
     logout = () => {
         localStorage.clear();
-        this.setState({
-          authenticated: '',
-          user: {},
-        })
+        this.setState({ authenticated: false, user: {} })
         //@ts-ignore
         this.props.history.push('/login')
     };
 
-    render() {
+    /**
+     * Show Login and Registration button when user in Authenticated.
+     * @param {text: text is visible on button,    loaction: next page loaction.}
+     */
+    noUser = (text: string, location: string) => {
+        return (
+            <div style={customStyles.maindiv}>
+                <div style={customStyles.subdiv}>
+                    <Typography variant="h6" style={{alignSelf: 'center',}}>FeedBack Application</Typography>
+                </div>
+                <div style={{alignSelf: 'center',}}>
+                    {/*
+                    // @ts-ignore */}
+                    <ButtonComponent text={text} location={location} history={this.props.history}/>
+                </div>
+            </div>
+        )
+    };
+
+    /**
+     * Show User profile, name , Dashbiard and Addfeedback button when user is Authenticated.
+     * @param {text: text is visible on button,    loaction: next page loaction.}
+     */
+    yesUser = (text: string, location: string) => {
         const {user} = this.state;
-        let text = ''
-        let location = ''
+        return (
+            <div style={customStyles.maindiv}>
+                <div style={customStyles.subdiv}>
+                    <IconButton edge="start" color="inherit" aria-label="menu">
+                        {/*
+                        // @ts-ignore */}
+                        <Avatar alt="Remy Sharp" src={user.profile_img}/>
+                    </IconButton>
+                    <Typography variant="h6" style={{alignSelf: 'center',}}>
+                        {/*
+                        // @ts-ignore */}
+                        {user.firstName} {user.lastName}
+                    </Typography>
+                </div>
+                <div style={{alignSelf: 'center',}}>
+                    {/*
+                    // @ts-ignore */}
+                    <ButtonComponent text={text} location={location} history={this.props.history}/>
+                    <Link to="" style={{color: 'white'}}><Button color="inherit" onClick={this.logout}>Logout</Button></Link>
+                </div>
+            </div>
+        )
+    };
+
+    render() {
+        let text = '';
+        let location = '';
         //@ts-ignore
-        if(this.props.location.pathname === '/login'){
-            text = 'register'
-            location = '/register'
-            //@ts-ignore
-        } else if(this.props.location.pathname === '/register') {
-            text = 'login'
-            location = '/login'
-            //@ts-ignore
-        } else if(this.props.location.pathname === '/dashboard') {
-            text = 'addfeedback'
-            location = '/addfeedback'
-            //@ts-ignore
-        } else if(this.props.location.pathname === '/addfeedback') {
-            text = 'dashboard'
-            location = '/dashboard'
-        }
+        if (this.props.location.pathname === '/login') { text = 'register';  location = '/register' }   //Condition when on Login Page.
+        //@ts-ignore
+        else if (this.props.location.pathname === '/register') { text = 'login';  location = '/login' }    //Condition when on Registration Page.
+        //@ts-ignore
+        else if (this.props.location.pathname === '/dashboard') { text = 'addfeedback';  location = '/addfeedback' }    //Condition when on AddFeedBack Page.
+        //@ts-ignore
+        else if (this.props.location.pathname === '/addfeedback') { text = 'dashboard';  location = '/dashboard' }    //Condition when on Dashboard Page.
         return (
             <AppBar position="static">
-                <Toolbar>
-                    {
-                        this.state.authenticated
-                            ?
-                            <div style={customStyles.maindiv}>
-                                <div style={customStyles.subdiv}>
-                                    <IconButton edge="start" color="inherit" aria-label="menu">
-                                        {/*
-                                        // @ts-ignore */}
-                                        <Avatar alt="Remy Sharp" src={user.profile_img}/>
-                                    </IconButton>
-                                    <Typography variant="h6" style={{alignSelf: 'center',}}>
-                                        {/*
-                                        // @ts-ignore */}
-                                        {user.firstName} {user.lastName}
-                                    </Typography>
-                                </div>
-                                <div style={{alignSelf: 'center',}}>
-                                    {/* <Link to="/dashboard" style={{color: 'white'}}><Button
-                                        color="inherit">DashBoard</Button></Link>
-                                    <Link to="/addfeedback" style={{color: 'white'}}><Button color="inherit">Add
-                                        FeedBack</Button></Link> */}
-                                    {/*
-                                    // @ts-ignore */}
-                                    <ButtonComponent text={text} location={location} history={this.props.history}/>
-                                    <Link to="" style={{color: 'white'}}><Button color="inherit" onClick={this.logout}>Logout</Button></Link>
-                                </div>
-                            </div>
-                            :
-                            <div style={customStyles.maindiv}>
-                                <div style={customStyles.subdiv}>
-                                    <Typography variant="h6" style={{alignSelf: 'center',}}>
-                                        FeedBack Application
-                                    </Typography>
-                                </div>
-                                <div style={{alignSelf: 'center',}}>
-                                    {/*<Link to="/login" hidden={!this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Login</Button></Link>*/}
-                                    {/*<Link to="/register" hidden={this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Registration</Button></Link>*/}
-                                    {/* <Link to="/login" hidden={!this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Login</Button></Link>
-                                    <Link to="/register" hidden={this.state.currentRoute} style={{color: 'white'}}><Button color="inherit" onClick={this.hideRoute}>Registration</Button></Link> */}
-                                    {/*
-                                    // @ts-ignore */}
-                                    <ButtonComponent text={text} location={location} history={this.props.history}/>
-                                </div>
-                            </div>
-                    }
-                </Toolbar>
+                <Toolbar>{ this.state.authenticated ? this.yesUser(text, location) : this.noUser(text, location) }</Toolbar>
             </AppBar>
         );
     }

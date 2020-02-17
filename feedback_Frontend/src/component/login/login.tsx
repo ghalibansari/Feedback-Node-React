@@ -1,10 +1,13 @@
 import React, {Component} from 'react'
-import {Paper, TextField} from '@material-ui/core';
+import {InputAdornment, Paper, TextField} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import {toastError, toastSuccess, toastWarning} from '../utils/toast'
 import {withOutTokenPost} from '../../helper/AxiosGlobal'
-import crypto from 'crypto'
+import IconButton from '@material-ui/core/IconButton';
+import {Loader} from '../utils/loader'
+import {RemoveRedEye} from '@material-ui/icons';
 
+//style
 const customStyle = {
     mainDiv: {
         display: 'flex',
@@ -13,12 +16,12 @@ const customStyle = {
         alignItems: 'center',
     },
     div: {
-        height: 350,
+        // height: 350,
         width: 450,
         marginTop: 100,
         marginBottom: 50,
         paddingTop: 70,
-        paddingBottom: 100,
+        paddingBottom: 50,
         borderColor: 'black',
     },
     input: {width: '70%'}
@@ -32,7 +35,8 @@ class login extends Component {
             emailErr: '',
             passwordErr: '',
         },
-        redirectto: ``
+        passwordIsMasked: true,
+        loading: false,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -40,75 +44,105 @@ class login extends Component {
         super(props)
     };
 
-    inputChange = (event: any, type: any) => {
-        this.setState({
-            [type]: event.target.value,
+    //toggle password visibility on login page.
+    togglePasswordMask = () => { this.setState({ passwordIsMasked: !this.state.passwordIsMasked }) };
+
+    inputChange = async (event: any, inputType: any) => {
+        await this.setState({[inputType]: event.target.value});
+        const {email, password} = this.state;
+        const mailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
+        const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        await this.setState((prevState: any) => {
+            let errors = {...prevState.errors};
+            if (inputType === 'email') {
+                if (!mailReg.test(email)) { errors.emailErr = 'Invalid email' }
+                else { errors.emailErr = '' }
+            }
+            if (inputType === 'password') {
+                if (!passwordReg.test(password)) { errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.' }
+                else { errors.passwordErr = '' }
+            }
+            return {errors}
         })
     };
 
     componentDidMount() {
-        let token = localStorage.getItem('token');
-        if (token) {
+        const token: any = localStorage.getItem('token');
+        //@ts-ignore
+        if (token !== null && token !== undefined) { this.props.isAuth(true) }
+        //@ts-ignore
+        else { this.props.isAuth(false) }
+        if (token !== null) {
             //@ts-ignore
             this.props.history.push('/dashboard')
-        }
-        // else {
+        } else {
             //@ts-ignore
-            // this.props.history.push('/login')
-        // }
+            this.props.history.push('/login')
+        }
     }
 
+    /**
+     * Login api.
+     * @param {email,   password}
+     */
     loginapi = async () => {
-        const {email, password} = this.state
+        const {email, password} = this.state;
         // eslint-disable-next-line no-useless-escape
         const mailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
         const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
-        this.setState((prevState: any) => {
+        await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
             if (!mailReg.test(email)) {
                 errors.emailErr = 'Invalid email'
             } else {
                 errors.emailErr = ''
             }
+
             if (!passwordReg.test(password)) {
-                errors.passwordErr = 'Inavlid password'
+                errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
             } else {
                 errors.passwordErr = ''
             }
             return {errors}
-        })
+        });
         if (mailReg.test(email) && passwordReg.test(password)) {
-            try{
-                let res = await withOutTokenPost('user/login', {email, password})
+            this.setState({loading: true});
+            try {
+                let res = await withOutTokenPost('user/login', {email, password});
                 if (res.data.success) {
+                    this.setState({loading: false});
                     localStorage.setItem('token', res.data.data.jwt_token);
                     localStorage.setItem('user', JSON.stringify(res.data.data.user));
                     if (res.data.data.user.first_login) {
-                        // toastSuccess("Please Change your password.")
-                        toastWarning("Please Change your password.")
+                        toastWarning("Please Change your password.");
                         //@ts-ignore
                         this.props.history.push('/reset')
                     } else {
-                        toastSuccess("Login Successfully.")
+                        toastSuccess("Login Successfully.");
                         //@ts-ignore
                         this.props.history.push('/dashboard')
                     }
                 }
             } catch (err) {
-                toastError(`${err.response.data.message}.`)
+                this.setState({loading: false});
+                toastError(`${err.response?.data?.message}.`)
             }
         }
     };
 
     render() {
+        const {passwordIsMasked} = this.state;
         return (
             <div style={customStyle.mainDiv}>
-                {this.state.redirectto}
+                {/*
+                //@ts-ignore */}
+                <Loader loading={this.state.loading}/>
                 <Paper style={customStyle.div} variant='elevation'>
                     <h1>Login.</h1>
                     <TextField
                         required
-                        id=""
+                        //@ts-ignore
+                        error={this.state.errors.emailErr}
                         helperText={this.state.errors.emailErr}
                         label="Email"
                         type="email"
@@ -121,10 +155,25 @@ class login extends Component {
                         required
                         id="standard-password-input"
                         label="Password"
-                        type="password"
+                        // type="password"
+                        type={passwordIsMasked ? 'password' : 'text'}
+                        //@ts-ignore
+                        error={this.state.errors.passwordErr}
                         helperText={this.state.errors.passwordErr}
                         autoComplete="current-password"
                         style={customStyle.input}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={this.togglePasswordMask}
+                                    >
+                                        <RemoveRedEye/>
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                         onChange={event => this.inputChange(event, 'password')}
                     />
                     <br/><br/>

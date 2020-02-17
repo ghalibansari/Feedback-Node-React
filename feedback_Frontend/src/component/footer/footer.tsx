@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
+//global footer.
 class footer extends Component {
-
     render() {
         return (
             <div className="card-footer"
@@ -11,5 +11,6 @@ class footer extends Component {
         );
     }
 }
+
 
 export default footer
