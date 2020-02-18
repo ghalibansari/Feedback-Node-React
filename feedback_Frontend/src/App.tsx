@@ -16,9 +16,7 @@ class App extends Component {
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
     constructor(props: any) {
         super(props);
-        this.state = {
-            isloggined: false //Login status variable. updated by login component.
-        }
+        this.state = { isloggined: false }      //Login status variable. updated by login component.
     };
 
     render() {

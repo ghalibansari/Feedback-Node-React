@@ -8,10 +8,8 @@ class ButtonComponent extends Component {
     }
 
     //Button click action.
-    click = () => {
-        //@ts-ignore
-        this.props.history.push(`${this.props.location}`)
-    };
+    //@ts-ignore
+    click = () => { this.props.history.push(`${this.props.location}`) };
 
     render() {
         return (

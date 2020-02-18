@@ -6,6 +6,7 @@ import {withOutTokenPost} from '../../helper/AxiosGlobal'
 import IconButton from '@material-ui/core/IconButton';
 import {Loader} from '../utils/loader'
 import {RemoveRedEye} from '@material-ui/icons';
+import {Constants} from '../../helper/constant'
 
 //style
 const customStyle = {
@@ -50,16 +51,19 @@ class login extends Component {
     inputChange = async (event: any, inputType: any) => {
         await this.setState({[inputType]: event.target.value});
         const {email, password} = this.state;
-        const mailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
-        const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        const mailReg: any = Constants.emailReg
+        const passwordReg: any = Constants.passwordReg
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
             if (inputType === 'email') {
-                if (!mailReg.test(email)) { errors.emailErr = 'Invalid email' }
+                //@ts-ignore
+                if (email === '' ) { errors.emailErr = Constants.required }
+                else if (!mailReg.test(email)) { errors.emailErr = Constants.emailErr }
                 else { errors.emailErr = '' }
             }
             if (inputType === 'password') {
-                if (!passwordReg.test(password)) { errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.' }
+                if (password === '' ) { errors.passwordErr = Constants.required }
+                else if (!passwordReg.test(password)) { errors.passwordErr = Constants.passwordErr }
                 else { errors.passwordErr = '' }
             }
             return {errors}
@@ -88,21 +92,14 @@ class login extends Component {
     loginapi = async () => {
         const {email, password} = this.state;
         // eslint-disable-next-line no-useless-escape
-        const mailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
-        const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        const mailReg: any = Constants.emailReg
+        const passwordReg: any = Constants.passwordReg;
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
-            if (!mailReg.test(email)) {
-                errors.emailErr = 'Invalid email'
-            } else {
-                errors.emailErr = ''
-            }
-
-            if (!passwordReg.test(password)) {
-                errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
-            } else {
-                errors.passwordErr = ''
-            }
+            if (!mailReg.test(email)) { errors.emailErr = Constants.emailErr }
+            else { errors.emailErr = Constants.blank }
+            if (!passwordReg.test(password)) { errors.passwordErr = Constants.passwordErr }
+            else { errors.passwordErr = Constants.blank }
             return {errors}
         });
         if (mailReg.test(email) && passwordReg.test(password)) {
@@ -142,7 +139,7 @@ class login extends Component {
                     <TextField
                         required
                         //@ts-ignore
-                        error={this.state.errors.emailErr}
+                        error={this.state.errors.emailErr ? true : false}
                         helperText={this.state.errors.emailErr}
                         label="Email"
                         type="email"
@@ -158,7 +155,7 @@ class login extends Component {
                         // type="password"
                         type={passwordIsMasked ? 'password' : 'text'}
                         //@ts-ignore
-                        error={this.state.errors.passwordErr}
+                        error={this.state.errors.passwordErr ? true : false}
                         helperText={this.state.errors.passwordErr}
                         autoComplete="current-password"
                         style={customStyle.input}

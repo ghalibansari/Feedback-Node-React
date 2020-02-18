@@ -11,6 +11,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import {withOutTokenPost} from "../../helper/AxiosGlobal";
 import {Loader} from '../utils/loader'
+import {Constants} from '../../helper/constant'
 
 //style
 const customStyle = {
@@ -58,28 +59,31 @@ class registration extends Component {
     inputChange = async (event: any, inputType: any) => {
         await this.setState({[inputType]: event.target.value});
         const {firstName, lastName, email, profile_img} = this.state;
-        const firstNameReg: any = /^[A-Za-z]+$/;
-        const lastNameReg: any = /^[A-Za-z]+$/;
+        const firstNameReg: any = Constants.nameReg
+        const lastNameReg: any = Constants.nameReg
         // eslint-disable-next-line no-useless-escape
-        const emailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
+        const emailReg: any = Constants.emailReg
         const profile_imgReg: any = '';
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
             if (inputType === 'firstName') {
-                if (!firstNameReg.test(firstName)) { errors.firstNameErr = 'Only Aphabet is allowed.' }
-                else { errors.firstNameErr = '' }
+                if (firstName === '' ) { errors.firstNameErr = Constants.required }
+                else if (!firstNameReg.test(firstName)) { errors.firstNameErr = Constants.nameErr }
+                else { errors.firstNameErr = Constants.blank }
             }
             if (inputType === 'lastName') {
-                if (!lastNameReg.test(lastName)) { errors.lastNameErr = 'Only Aphabet is allowed.' }
-                else { errors.lastNameErr = '' }
+                if (lastName === '' ) { errors.lastNameErr = Constants.required }
+                else if (!lastNameReg.test(lastName)) { errors.lastNameErr = Constants.nameErr }
+                else { errors.lastNameErr = Constants.blank }
             }
             if (inputType === 'email') {
-                if (!emailReg.test(email)) { errors.emailErr = 'Invalid Email.' }
-                else { errors.emailErr = '' }
+                if (email === '' ) { errors.emailErr = Constants.required }
+                else if (!emailReg.test(email)) { errors.emailErr = Constants.emailErr }
+                else { errors.emailErr = Constants.blank }
             }
             if (inputType === 'profile_img') {
                 if (!(profile_imgReg !== profile_img)) { errors.profile_imgErr = '  Upload image.' }
-                else { errors.profile_imgErr = '' }
+                else { errors.profile_imgErr = Constants.blank }
             }
             return {errors}
         })
@@ -94,34 +98,34 @@ class registration extends Component {
     registerapi = async () => {
         this.setState({loading: true});
         const {firstName, lastName, email, dob, gender, profile_img} = this.state;
-        const firstNameReg: any = /^[A-Za-z]+$/;
-        const lastNameReg: any = /^[A-Za-z]+$/;
+        const firstNameReg: any = Constants.nameReg
+        const lastNameReg: any = Constants.nameReg
         // eslint-disable-next-line no-useless-escape
-        const emailReg: any = /^[a-zA-Z]{1,}([.])?[a-zA-Z0-9]{1,}([!@#$%&_-]{1})?[a-zA-Z0-9]{1,}[@]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,3}([.]{1}[a-zA-Z]{2})?$/;
-        const dobReg: any = '';
-        const genderReg: any = '';
+        const emailReg: any = Constants.emailReg
+        const dobReg: any = Constants.blank
+        const genderReg: any = Constants.blank
         const profile_imgReg: any = '';
 
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
-            if (!firstNameReg.test(firstName)) { errors.firstNameErr = 'Only Aphabet is allowed.' }
-            else { errors.firstNameErr = '' }
+            if (!firstNameReg.test(firstName)) { errors.firstNameErr = Constants.nameErr }
+            else { errors.firstNameErr = Constants.blank }
 
-            if (!lastNameReg.test(lastName)) { errors.lastNameErr = 'Only Aphabet is allowed.' }
-            else { errors.lastNameErr = '' }
+            if (!lastNameReg.test(lastName)) { errors.lastNameErr = Constants.nameErr }
+            else { errors.lastNameErr = Constants.blank }
 
-            if (!emailReg.test(email)) { errors.emailErr = 'Invalid Email.' }
-            else { errors.emailErr = '' }
+            if (!emailReg.test(email)) { errors.emailErr = Constants.emailErr }
+            else { errors.emailErr = Constants.blank }
 
-            if (!(dobReg !== dob)) { errors.dobErr = 'Please Provide valid dob.' }
+            if (!(dobReg !== dob)) { errors.dobErr = Constants.dobErr }
             else if (!(new Date(dob) < new Date())) { errors.dobErr = 'Date should be less than current date.' }
-            else { errors.dobErr = '' }
+            else { errors.dobErr = Constants.blank }
 
             if (!(genderReg !== gender)) { errors.genderErr = 'Please select one.' }
-            else { errors.genderErr = '' }
+            else { errors.genderErr = Constants.blank }
 
-            if (!(profile_imgReg !== profile_img)) { errors.profile_imgErr = '  Upload image.' }
-            else { errors.profile_imgErr = '' }
+            if (!(profile_imgReg !== profile_img)) { errors.profile_imgErr = ' Upload image.' }
+            else { errors.profile_imgErr = Constants.blank }
             return {errors}
         });
 
@@ -169,7 +173,7 @@ class registration extends Component {
                         id=""
                         helperText={this.state.errors.firstNameErr}
                         //@ts-ignore
-                        error={this.state.errors.firstNameErr}
+                        error={this.state.errors.firstNameErr ? true : false}
                         label="First Name"
                         type="firstName"
                         autoComplete="firstName"
@@ -184,7 +188,7 @@ class registration extends Component {
                         type="lastName"
                         helperText={this.state.errors.lastNameErr}
                         //@ts-ignore
-                        error={this.state.errors.lastNameErr}
+                        error={this.state.errors.lastNameErr ? true : false}
                         autoComplete=""
                         style={customStyle.input}
                         onChange={event => this.inputChange(event, 'lastName')}
@@ -197,7 +201,7 @@ class registration extends Component {
                         type="email"
                         helperText={this.state.errors.emailErr}
                         //@ts-ignore
-                        error={this.state.errors.emailErr}
+                        error={this.state.errors.emailErr ? true : false}
                         // autoComplete=""
                         style={customStyle.input}
                         onChange={event => this.inputChange(event, 'email')}

@@ -6,6 +6,7 @@ import {withTokenPost} from "../../helper/AxiosGlobal";
 import {RemoveRedEye} from '@material-ui/icons';
 import IconButton from '@material-ui/core/IconButton';
 import {Loader} from '../utils/loader'
+import {Constants} from '../../helper/constant'
 
 //Style
 const customStyle = {
@@ -59,21 +60,21 @@ class login extends Component {
      * Onchange event listner for all input's
      * @param {event,   type: which button.}
      */
-    inputChange = async (event: any, type: any) => {
-        await this.setState({[type]: event.target.value});
+    inputChange = async (event: any, inputType: any) => {
+        await this.setState({[inputType]: event.target.value});
         const {password, newpassword} = this.state;
-        const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        const passwordReg: any = Constants.passwordReg
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
-            if (!passwordReg.test(password)) {
-                errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
-            } else {
-                errors.passwordErr = ''
+            if ( inputType === 'password') {
+                if (password === '' ) { errors.passwordErr = Constants.required }
+                else if (!passwordReg.test(password)) { errors.passwordErr = Constants.passwordErr }
+                else { errors.passwordErr = Constants.blank }
             }
-            if (!passwordReg.test(newpassword)) {
-                errors.newpasswordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
-            } else {
-                errors.newpasswordErr = ''
+            if ( inputType === 'newpassword') {
+                if (newpassword === '' ) { errors.newpasswordErr = Constants.required }
+                else if (!passwordReg.test(newpassword)) { errors.newpasswordErr = Constants.passwordErr }
+                else { errors.newpasswordErr = Constants.blank }
             }
             return {errors}
         })
@@ -97,19 +98,13 @@ class login extends Component {
     resetapi = async () => {
         await this.setState({loading: true});
         const {password, newpassword} = this.state;
-        const passwordReg: any = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z-\d]{8,}$/;
+        const passwordReg: any = Constants.passwordReg
         await this.setState((prevState: any) => {
             let errors = {...prevState.errors};
-            if (!passwordReg.test(password)) {
-                errors.passwordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
-            } else {
-                errors.passwordErr = ''
-            }
-            if (!passwordReg.test(newpassword)) {
-                errors.newpasswordErr = 'password should have min 8 character, atleast 1 number and 1 alphabet.'
-            } else {
-                errors.newpasswordErr = ''
-            }
+            if (!passwordReg.test(password)) { errors.passwordErr = Constants.passwordErr }
+            else { errors.passwordErr = Constants.blank }
+            if (!passwordReg.test(newpassword)) { errors.newpasswordErr = Constants.passwordErr }
+            else { errors.newpasswordErr = Constants.blank }
             return {errors}
         });
         if (passwordReg.test(password) && passwordReg.test(newpassword)) {

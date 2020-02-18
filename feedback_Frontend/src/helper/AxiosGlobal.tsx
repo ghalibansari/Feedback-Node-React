@@ -1,7 +1,5 @@
 import axios from 'axios'
-
-
-const baseURL = `http://localhost:3000/`;
+import {Constants} from '../helper/constant'
 
 
 /**
@@ -9,7 +7,7 @@ const baseURL = `http://localhost:3000/`;
  * @param {url,    data,   headers: Defined content type in registration page.}
  */
 export const withOutTokenPost = async (url: string, data: any, headers: object | null = null) => {
-    const withToken = axios.create({baseURL, headers});
+    const withToken = axios.create({baseURL: Constants.baseURL, headers});
     try { return await withToken.post(url, data) }
     catch (err) { throw err }
 };
@@ -21,7 +19,7 @@ export const withOutTokenPost = async (url: string, data: any, headers: object |
  */
 export const withTokenGet = async (url: string) => {
     const token: any = localStorage.getItem('token');
-    const withToken = axios.create({baseURL, headers: {Authorization: `${token}`}});
+    const withToken = axios.create({baseURL: Constants.baseURL, headers: {Authorization: `${token}`}});
     try { return await withToken.get(url) }
     catch (err) { throw err }
 };
@@ -33,7 +31,7 @@ export const withTokenGet = async (url: string) => {
  */
 export const withTokenPost = async (url: string, data: any) => {
     const token: any = localStorage.getItem('token');
-    const withToken = axios.create({baseURL, headers: {Authorization: `${token}`}});
+    const withToken = axios.create({baseURL: Constants.baseURL, headers: {Authorization: `${token}`}});
     try { return await withToken.post(url, data) }
     catch (err) { throw err }
 };
