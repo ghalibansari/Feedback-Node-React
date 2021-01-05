@@ -31,7 +31,7 @@
     "@types/react-router-dom": "^5.1.3",
     "@types/react-toastify": "^4.1.0",
     "@types/yup": "^0.26.29",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "clsx": "^1.0.4",
     "crypt.io": "^1.0.8",
     "crypto-js": "^4.0.0",
